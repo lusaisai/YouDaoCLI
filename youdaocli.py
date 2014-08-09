@@ -13,7 +13,7 @@ class YouDao:
         if not word.strip():
             return []
         url_prefix = 'http://dsuggest.ydstatic.com/suggest/suggest.s?query='
-        data = urllib.request.urlopen(url_prefix + word).read().decode()
+        data = urllib.request.urlopen(url_prefix + urllib.parse.quote(word)).read().decode('utf-8')
         soup = bs4.BeautifulSoup(urllib.parse.unquote(data))
         td = soup.find_all('td', class_='remindtt75')
         return [s.string for s in td]
@@ -23,7 +23,7 @@ class YouDao:
         response = []
 
         url_prefix = 'http://dict.youdao.com/search?q='
-        data = urllib.request.urlopen(url_prefix + word).read().decode()
+        data = urllib.request.urlopen(url_prefix + urllib.parse.quote(word)).read().decode()
         soup = bs4.BeautifulSoup(urllib.parse.unquote(data))
 
         pron = soup.find('div', class_='baav')
@@ -47,6 +47,9 @@ class YouDao:
             trans_list = soup.find('div', class_='trans-container').find_all('li')
             for li in trans_list:
                 response.append(li.string)
+            trans_list = soup.find('div', class_='trans-container').find_all('p', class_='wordGroup')
+            for li in trans_list:
+                response.append(YouDao.list_join([YouDao.string_clean(e) for e in li.strings]))
 
         return response
 
