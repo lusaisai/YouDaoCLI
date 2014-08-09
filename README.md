@@ -8,7 +8,5 @@ YouDao dictionary command line interface, 有道词典的命令行界面.
 
 Dependency
 -----
-Python3 and its Beautiful Soup library.
-```shell
-$ sudo apt-get install python3-bs4
-```
+Python3 and its [Beautiful Soup library](http://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-beautiful-soup Beautiful Soup library).
+
