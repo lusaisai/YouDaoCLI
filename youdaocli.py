@@ -23,7 +23,7 @@ class YouDao:
         response = []
 
         url_prefix = 'http://dict.youdao.com/search?q='
-        data = urllib.request.urlopen(url_prefix + urllib.parse.quote(word)).read().decode()
+        data = urllib.request.urlopen(url_prefix + urllib.parse.quote(word)).read().decode('utf-8')
         soup = bs4.BeautifulSoup(urllib.parse.unquote(data))
 
         pron = soup.find('div', class_='baav')
