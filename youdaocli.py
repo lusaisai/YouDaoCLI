@@ -5,6 +5,7 @@ import urllib.parse
 import bs4
 import re
 import readline
+import sys
 
 
 class YouDao:
@@ -74,7 +75,7 @@ suggest_buffer = {}
 
 
 def complete(word, state):
-    if not word in suggest_buffer:
+    if word not in suggest_buffer:
         suggest_buffer[word] = YouDao.suggest(word)
 
     return (suggest_buffer[word] + [None])[state]
@@ -83,6 +84,20 @@ def complete(word, state):
 readline.parse_and_bind('tab: complete')
 readline.set_completer(complete)
 
+
+def translate_then_print(word):
+    meanings = YouDao.result(word)
+    for x in meanings:
+        print(x)
+
+
+# when there are command line arguments, it will do the translation and exit
+# otherwise, it will enter the interactive mode
+if len(sys.argv) > 1:
+    translate_then_print(' '.join(sys.argv[1:]))
+    exit()
+
+# interactive mode
 print("YouDaoCLI")
 print("Press tab for suggestions")
 print("Press ctrl+d to exit")
@@ -92,9 +107,7 @@ while True:
         line = input('> ')
         if not line.strip(' \t\n\r'):
             continue
-        meanings = YouDao.result(line)
-        for x in meanings:
-            print(x)
+        translate_then_print(line)
     except KeyboardInterrupt:
         print()
         pass
