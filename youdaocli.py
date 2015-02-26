@@ -45,12 +45,15 @@ class YouDao:
                         YouDao.highlight(word, YouDao.list_join([YouDao.string_clean(e) for e in examples.strings])))
                 response.append("")
         else:
-            trans_list = soup.find('div', class_='trans-container').find_all('li')
-            for li in trans_list:
-                response.append(li.string)
-            trans_list = soup.find('div', class_='trans-container').find_all('p', class_='wordGroup')
-            for li in trans_list:
-                response.append(YouDao.list_join([YouDao.string_clean(e) for e in li.strings]))
+            try:
+                trans_list = soup.find('div', class_='trans-container').find_all('li')
+                for li in trans_list:
+                    response.append(li.string)
+                trans_list = soup.find('div', class_='trans-container').find_all('p', class_='wordGroup')
+                for li in trans_list:
+                    response.append(YouDao.list_join([YouDao.string_clean(e) for e in li.strings]))
+            except AttributeError:
+                pass  # AttributeError: 'NoneType' object has no attribute 'find_all'
 
         return response
 
