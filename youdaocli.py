@@ -13,9 +13,9 @@ class YouDao:
     def suggest(word):
         if not word.strip():
             return []
-        url_prefix = 'http://dsuggest.ydstatic.com/suggest/suggest.s?query='
+        url_prefix = 'https://dsuggest.ydstatic.com/suggest.s?query='
         data = urllib.request.urlopen(url_prefix + urllib.parse.quote(word)).read().decode('utf-8')
-        soup = bs4.BeautifulSoup(urllib.parse.unquote(data))
+        soup = bs4.BeautifulSoup(urllib.parse.unquote(data), "html.parser")
         td = soup.find_all('td', class_='remindtt75')
         return [s.string for s in td]
 
@@ -23,9 +23,9 @@ class YouDao:
     def result(word):
         response = []
 
-        url_prefix = 'http://dict.youdao.com/search?q='
+        url_prefix = 'http://dict.youdao.com/w/'
         data = urllib.request.urlopen(url_prefix + urllib.parse.quote(word)).read().decode('utf-8')
-        soup = bs4.BeautifulSoup(urllib.parse.unquote(data))
+        soup = bs4.BeautifulSoup(urllib.parse.unquote(data), "html.parser")
 
         pron = soup.find('div', class_='baav')
         if pron:
@@ -59,7 +59,7 @@ class YouDao:
 
     @staticmethod
     def string_clean(word):
-        return re.sub('\s+', ' ', word).strip(' \t\n\r')
+        return re.sub(r'\s+', ' ', word).strip(' \t\n\r')
 
     @staticmethod
     def list_join(li):
@@ -67,53 +67,53 @@ class YouDao:
 
     @staticmethod
     def highlight(word, sentence):
-        result = re.sub('^' + word + '\s', '\033[92m' + word + '\033[0m ', sentence)
-        result = re.sub('\s' + word + '\s', ' \033[92m' + word + '\033[0m ', result)
-        result = re.sub('\s' + word + '([,.?!"\':;])', ' \033[92m' + word + "\033[0m\g<1>", result)
+        result = re.sub('^' + word + r'\s', '\033[92m' + word + '\033[0m ', sentence)
+        result = re.sub(r'\s' + word + r'\s', ' \033[92m' + word + '\033[0m ', result)
+        result = re.sub(r'\s' + word + '([,.?!"\':;])', r' \033[92m' + word + r"\033[0m\g<1>", result)
         return result
 
 
-# CLI support
-suggest_buffer = {}
+if __name__ == '__main__':
+    suggest_buffer = {}
 
 
-def complete(word, state):
-    if word not in suggest_buffer:
-        suggest_buffer[word] = YouDao.suggest(word)
+    def complete(word, state):
+        if word not in suggest_buffer:
+            suggest_buffer[word] = YouDao.suggest(word)
 
-    return (suggest_buffer[word] + [None])[state]
-
-
-readline.parse_and_bind('tab: complete')
-readline.set_completer(complete)
+        return (suggest_buffer[word] + [None])[state]
 
 
-def translate_then_print(word):
-    meanings = YouDao.result(word)
-    for x in meanings:
-        print(x)
+    readline.parse_and_bind('tab: complete')
+    readline.set_completer(complete)
 
 
-# when there are command line arguments, it will do the translation and exit
-# otherwise, it will enter the interactive mode
-if len(sys.argv) > 1:
-    translate_then_print(' '.join(sys.argv[1:]))
-    exit()
+    def translate_then_print(word):
+        meanings = YouDao.result(word)
+        for x in meanings:
+            print(x)
 
-# interactive mode
-print("YouDaoCLI")
-print("Press tab for suggestions")
-print("Press ctrl+d to exit")
 
-while True:
-    try:
-        line = input('> ')
-        if not line.strip(' \t\n\r'):
-            continue
-        translate_then_print(line)
-    except KeyboardInterrupt:
-        print()
-        pass
-    except EOFError:
-        print("\nExit.")
+    # when there are command line arguments, it will do the translation and exit
+    # otherwise, it will enter the interactive mode
+    if len(sys.argv) > 1:
+        translate_then_print(' '.join(sys.argv[1:]))
         exit()
+
+    # interactive mode
+    print("YouDaoCLI")
+    print("Press tab for suggestions")
+    print("Press ctrl+d to exit")
+
+    while True:
+        try:
+            line = input('> ')
+            if not line.strip(' \t\n\r'):
+                continue
+            translate_then_print(line)
+        except KeyboardInterrupt:
+            print()
+            pass
+        except EOFError:
+            print("\nExit.")
+            exit()
